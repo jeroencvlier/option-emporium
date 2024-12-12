@@ -34,7 +34,7 @@ auto-commit:
 
 increment-version: 
 	git tag $(NEW_TAG); \
-	git push origin $(NEW_TAG);
+	git push --follow-tags;
 
 release: test auto-commit increment-version
 
