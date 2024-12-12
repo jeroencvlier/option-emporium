@@ -24,8 +24,9 @@ commit:
 		echo "New tag: $(NEW_TAG)"; \
 	fi; \
 	git add .; \
-	git commit -m "Auto-commit: preparing for release $(NEW_TAG)"; \
-	git push origin; \
+	git commit -m "Auto-commit: preparing for release $(NEW_TAG)"; 
+# \
+# git push origin; \
 
 increment-version:
 	git tag $(NEW_TAG); \
