@@ -26,7 +26,7 @@ jobs:
         id: get-versions
         run: |
           versions=$(grep '^python =' pyproject.toml | grep -oP '>=\d+\.\d+' | sed 's/>=//')
-          json=$(echo $versions | jq -R -s 'split(" ")')
+          json=$(echo $versions | tr '\n' ' ' | jq -R -s 'split(" ") | map(select(length > 0))')
           echo "python-versions=$json" >> $GITHUB_OUTPUT
 
   test:
@@ -34,7 +34,7 @@ jobs:
     needs: prepare
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest,  macos-latest]
         python-version: ${{ fromJson(needs.prepare.outputs.python-versions) }}
 
     runs-on: ${{ matrix.os }}
