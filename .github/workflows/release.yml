@@ -11,9 +11,33 @@ on:
 env:
   PACKAGE_NAME: "option-emporium"
   OWNER: jeroencvlier"
-#   TAP_NAME: "<TAP_NAME>"
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13'] 
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+  
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+  
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install
+  
+      - name: Run tests
+        run: |
+          poetry run pytest --maxfail=1 --disable-warnings
+
   details:
     runs-on: ubuntu-latest
     outputs:
@@ -141,27 +165,3 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create ${{ needs.details.outputs.tag_name }} dist/* --title ${{ needs.details.outputs.tag_name }} --generate-notes
-
-#   bump_homebrew_formula:
-#     name: Dispatch event to Repo B
-#     needs: [details, github_release, pypi_publish]
-#     runs-on: ubuntu-latest
-#     environment:
-#       name: release
-#     steps:
-#       - name: Dispatch Repository Dispatch event
-#         uses: peter-evans/repository-dispatch@v2
-#         with:
-#           token: ${{ secrets.BREW_TAP_TOKEN }}
-#           repository: ${{ env.OWNER }}/{{ env.TAP_NAME }}
-#           event-type: "update-formula"
-#           client-payload: |-
-#             { 
-#               "formula_version": "${{env.FORMULA_VERSION}}", 
-#               "formula_url": "${{ env.FORMULA_URL }}", 
-#               "formula_name": "${{ env.FORMULA_NAME }}"
-#             }
-#         env:
-#           FORMULA_VERSION: ${{ needs.details.outputs.new_version }}
-#           FORMULA_NAME: ${{ env.PACKAGE_NAME }}
-#           FORMULA_URL: https://github.com/${{env.OWNER}}/${{env.PACKAGE_NAME}}/releases/download/${{ needs.details.outputs.new_version }}/${{env.PACKAGE_NAME}}-${{ needs.details.outputs.new_version }}.tar.gz

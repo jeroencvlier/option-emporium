@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
-pandas = "^2.2.3"
+pandas = ">=2.1"
 loguru = "^0.7.3"
 pandas-market-calendars = "^4.4.2"
 
