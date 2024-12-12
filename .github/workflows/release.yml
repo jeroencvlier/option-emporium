@@ -39,6 +39,7 @@ jobs:
           poetry run pytest --maxfail=1 --disable-warnings
 
   details:
+    needs: test
     runs-on: ubuntu-latest
     outputs:
       new_version: ${{ steps.release.outputs.new_version }}
