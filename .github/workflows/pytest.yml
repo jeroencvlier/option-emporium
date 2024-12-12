@@ -9,24 +9,35 @@ on:
       - main
 
 jobs:
+  prepare:
+    name: Prepare Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      python-versions: ${{ steps.get-versions.outputs.python-versions }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Extract Python Versions from pyproject.toml
+        id: get-versions
+        run: |
+          versions=$(poetry env info --python | grep -oP '(?<=>=)\d+\.\d+')
+          json=$(echo $versions | jq -R -s 'split(" ")')
+          echo "python-versions=$json" >> $GITHUB_OUTPUT
+
   test:
     name: Run Unit Tests on Multiple Machines
+    needs: prepare
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ${{ fromJson(steps.python-versions.outputs.versions) }}
+        python-version: ${{ fromJson(needs.prepare.outputs.python-versions) }}
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Check out code
         uses: actions/checkout@v3
-
-      - name: Extract Python Versions from pyproject.toml
-        id: python-versions
-        run: |
-          versions=$(poetry env info --python | grep -oP '(?<=>=)\d+\.\d+')
-          echo "versions=[\"$(echo $versions | tr ' ' '\", \"')\"]" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v4
