@@ -4,3 +4,4 @@
 import option_emporium as oe
 ```
 
+This is a Python package.
