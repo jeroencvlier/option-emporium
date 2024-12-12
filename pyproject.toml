@@ -11,6 +11,9 @@ pandas = ">=2.1.4"
 loguru = "^0.7.3"
 pandas-market-calendars = "^4.4.2"
 
+[tool.poetry.extras]
+exclude = ["tinyearn"]
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
 

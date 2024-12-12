@@ -423,7 +423,10 @@ files = [
 [package.extras]
 dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 
+[extras]
+exclude = []
+
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "6872cd606c16c4e03797cfef18a648ea6283a78ad499925a58553f550d7f5fb4"
+content-hash = "d6fa4bc4c4daa9043025e3d4ba53c12c6ec3f2849c4c0d1a7e05824ce4855a59"
