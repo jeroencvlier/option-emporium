@@ -10,32 +10,12 @@ on:
       - main
 
 jobs:
-  prepare:
-    name: Prepare Matrix
-    runs-on: ubuntu-latest
-    outputs:
-      python-versions: ${{ steps.get-versions.outputs.python-versions }}
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Install Dependencies for Parsing
-        run: sudo apt-get install -y jq
-
-      - name: Extract Python Versions from pyproject.toml
-        id: get-versions
-        run: |
-          versions=$(grep '^python =' pyproject.toml | grep -oP '>=\d+\.\d+' | sed 's/>=//')
-          json=$(echo $versions | tr '\n' ' ' | jq -R -s 'split(" ") | map(select(length > 0))')
-          echo "python-versions=$json" >> $GITHUB_OUTPUT
-
   test:
     name: Run Unit Tests on Multiple Machines
-    needs: prepare
     strategy:
       matrix:
-        os: [ubuntu-latest,  macos-latest]
-        python-version: ${{ fromJson(needs.prepare.outputs.python-versions) }}
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.9', '3.10', '3.11', '3.12']
 
     runs-on: ${{ matrix.os }}
 
