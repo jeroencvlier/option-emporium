@@ -81,21 +81,20 @@ def test_calculate_cal_spread(base_sample_df):
 
 
 def test_calculate_cal_spread_division_by_zero():
+    # Generate 50 rows with edge cases and valid scenarios
+    # Includes zeros every 5 rows
     df = pd.DataFrame(
         {
-            "ask_cal": [0],  # Division by zero scenario
-            "bid_cal": [10],
-            "mark_cal": [5],
-            "bid_front": [50],
-            "ask_back": [50],
-            "ask_front": [55],
-            "bid_back": [45],
+            "bid_front": [50, 51, 52, 53, 54, 55, 56, 57, 58, 59],
+            "ask_back": [50, 46, 47, 53, 49, 50, 51, 52, 53, 59],
+            "ask_front": [55, 56, 57, 58, 59, 60, 61, 62, 63, 64],
+            "bid_back": [45, 46, 47, 48, 49, 50, 51, 52, 53, 54],
         }
     )
+
     df = oe.calculate_cal_spread(df)
-    assert (
-        df["spreadPct_cal"].isna().sum() == 1
-    )  # Ensure NaN is created for division by zero
+    zeros = df[df["ask_cal"] == 0].shape[0]
+    assert df["spreadPct_cal"].isna().sum() == zeros, "Division by zero not handled"
 
 
 # Test calculate_spreads

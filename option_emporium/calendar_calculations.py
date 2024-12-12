@@ -68,17 +68,17 @@ def calculate_cal_spread(df: pd.DataFrame) -> pd.DataFrame:
     Raises:
         KeyError: If any of the required columns are missing in the input DataFrame.
     """
-    required_columns = ["ask_cal", "bid_cal", "mark_cal"]
+    required_columns = ["bid_front", "ask_back", "ask_front", "bid_back"]
     if not all(col in df.columns for col in required_columns):
         raise KeyError(f"Required columns {required_columns} not found in DataFrame.")
 
-    df["ask_cal"] = fc32(
-        df["bid_front"] - df["ask_back"]
-    )  # should be larger than bid_cal
-    df["bid_cal"] = fc32(
-        df["ask_front"] - df["bid_back"]
-    )  # should be smaller than ask_cal
+    # ask_cal should be larger than bid_cal
+    df["ask_cal"] = fc32(df["bid_front"] - df["ask_back"])
+
+    # bid_cal should be smaller than ask_cal
+    df["bid_cal"] = fc32(df["ask_front"] - df["bid_back"])
     df["spread_cal"] = df["bid_cal"] - df["ask_cal"]
+
     # Handle division by zero for spreadPct_cal
     # TODO: Handle division by zero for spreadPct_cal
     df["spreadPct_cal"] = df.apply(

@@ -13,9 +13,9 @@ endef
 
 NEW_TAG := $(call NEXT_AVAILABLE_TAG)
 
-.PHONY: release pre-commit-test auto-commit increment-version help
+.PHONY: release test auto-commit increment-version help
 
-pre-commit-test:
+test:
 	poetry run pytest -v --maxfail=1 --disable-warnings || { echo "Error: Tests failed."; exit 1; }
 
 auto-commit:
@@ -33,17 +33,16 @@ auto-commit:
 	git push -u origin main
 
 increment-version:
-	git add .
 	git tag -a $(NEW_TAG) -m "Finalizing release $(NEW_TAG)"
 	git push origin $(NEW_TAG)
 
-release: pre-commit-test auto-commit increment-version
+release: test auto-commit increment-version
 
 .DEFAULT_GOAL := help
 
 help:
 	@echo "Available targets:"
 	@echo "  release           - Run tests, increment the bug-fix version of the latest tag, lock dependencies, commit changes, and push the tag."
-	@echo "  pre-commit-test   - Run pytest with verbose output, stop after the first failure, and suppress warnings."
+	@echo "  test              - Run pytest with verbose output, stop after the first failure, and suppress warnings."
 	@echo "  auto-commit       - Lock dependencies with Poetry, prepare the commit with the new version, and stage changes."
 	@echo "  increment-version - Create and push the new version tag with a unique message."
