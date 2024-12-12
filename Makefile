@@ -31,11 +31,12 @@ auto-commit:
 	fi; \
 	git add .; \
 	git commit -m "Auto-commit: preparing for release $(NEW_TAG)"; \
-	git push -u origin main;
+	git push origin main;
 
 increment-version: 
+	poetry version $(NEW_TAG) || { echo "Error: Poetry version failed."; exit 1; }
 	git tag $(NEW_TAG); \
-	git push -u origin $(NEW_TAG);
+	git push origin $(NEW_TAG);
 
 release: test auto-commit increment-version
 

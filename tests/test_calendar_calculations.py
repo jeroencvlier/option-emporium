@@ -83,7 +83,7 @@ def test_calculate_cal_spread(base_sample_df):
 def test_calculate_cal_spread_division_by_zero():
     df = pd.DataFrame(
         {
-            "ask_cal": [1],  # Division by zero scenario
+            "ask_cal": [0],  # Division by zero scenario
             "bid_cal": [10],
             "mark_cal": [5],
             "bid_front": [50],
