@@ -20,7 +20,7 @@ NEW_TAG := $(call NEXT_AVAILABLE_TAG)
 test:
 	poetry run pytest -v --maxfail=1 --disable-warnings || { echo "Error: Tests failed."; exit 1; }
 
-auto-commit:
+stage-release:
 	poetry lock || { echo "Error: Poetry lock failed."; exit 1; }
 	@if [ "$(LATEST_TAG)" = "0.0.0" ]; then \
 		echo "No tags found. Initializing tag to 0.0.1"; \
@@ -29,18 +29,14 @@ auto-commit:
 		echo "Latest tag: $(LATEST_TAG)"; \
 		echo "New tag: $(NEW_TAG)"; \
 	fi; \
-	git add .; \
-	git commit -m "Auto-commit: preparing for release $(NEW_TAG)"; \
-
-increment-version: 
 	poetry version $(NEW_TAG) || { echo "Error: Poetry version failed."; exit 1; }
-	git add pyproject.toml
-	git commit -m "Release $(NEW_TAG)"
-	git tag -a $(NEW_TAG) -m "Release $(NEW_TAG)"
+	git add .
+	git commit -m "Auto Commit for poetry dependancies and auto release: $(NEW_TAG)"
+	git tag -a $(NEW_TAG) -m "Release Tag: $(NEW_TAG)"
 	git push origin main
 	git push origin $(NEW_TAG);
 
-release: test auto-commit increment-version
+release: test stage-release
 
 help:
 	@echo "Available targets:"
