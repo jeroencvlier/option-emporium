@@ -30,10 +30,10 @@ auto-commit:
 	poetry version $(NEW_TAG) || { echo "Error: Poetry version failed."; exit 1; }
 	git add .
 	git commit -m "Dependencies updated and version bumped to $(NEW_TAG)"
+	git push -u origin main
 
 increment-version: 
-	git tag -a $(NEW_TAG) -m "Release version $(NEW_TAG): This tag includes updates and bug fixes."
-	git push origin main
+	git tag -a $(NEW_TAG) -m "Release version: $(NEW_TAG)"
 	git push origin $(NEW_TAG)
 
 release: pre-commit-test auto-commit increment-version
