@@ -31,11 +31,13 @@ auto-commit:
 	fi; \
 	git add .; \
 	git commit -m "Auto-commit: preparing for release $(NEW_TAG)"; \
-	git push origin main;
 
 increment-version: 
 	poetry version $(NEW_TAG) || { echo "Error: Poetry version failed."; exit 1; }
+	git add pyproject.toml
+	git commit -m "Release $(NEW_TAG)"
 	git tag -a $(NEW_TAG) -m "Release $(NEW_TAG)"
+	git push origin main
 	git push origin $(NEW_TAG);
 
 release: test auto-commit increment-version
