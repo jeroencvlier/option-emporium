@@ -32,8 +32,9 @@ auto-commit:
 	git commit -m "Dependencies updated and version bumped to $(NEW_TAG)"
 	git push -u origin main
 
-increment-version: 
+increment-version:
 	git tag -a $(NEW_TAG) -m "Release version: $(NEW_TAG)"
+	git commit -m "Finalizing release $(NEW_TAG)"
 	git push origin $(NEW_TAG)
 
 release: pre-commit-test auto-commit increment-version
