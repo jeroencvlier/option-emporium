@@ -30,11 +30,12 @@ auto-commit:
 		echo "New tag: $(NEW_TAG)"; \
 	fi; \
 	git add .; \
-	git commit -m "Auto-commit: preparing for release $(NEW_TAG)"; 
+	git commit -m "Auto-commit: preparing for release $(NEW_TAG)"; \
+	git push -u origin main;
 
 increment-version: 
 	git tag $(NEW_TAG); \
-	git push origin --follow-tags;
+	git push -u origin --follow-tags;
 
 release: test auto-commit increment-version
 
