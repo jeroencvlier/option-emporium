@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "option-emporium"
-version = "0.0.25"
+version = "0.0.26"
 description = ""
 authors = ["Jeroen van Lier <jeroencvlier@gmail.com>"]
 readme = "README.md"

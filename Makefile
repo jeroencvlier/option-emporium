@@ -12,15 +12,13 @@ $(shell \
 endef
 
 NEW_TAG := $(call NEXT_AVAILABLE_TAG)
-.DEFAULT_GOAL := help
 
+.PHONY: release pre-commit-test auto-commit increment-version help
 
-.PHONY: release test auto-commit increment-version help
-
-test:
+pre-commit-test:
 	poetry run pytest -v --maxfail=1 --disable-warnings || { echo "Error: Tests failed."; exit 1; }
 
-stage-release:
+auto-commit:
 	poetry lock || { echo "Error: Poetry lock failed."; exit 1; }
 	@if [ "$(LATEST_TAG)" = "0.0.0" ]; then \
 		echo "No tags found. Initializing tag to 0.0.1"; \
@@ -31,16 +29,20 @@ stage-release:
 	fi; \
 	poetry version $(NEW_TAG) || { echo "Error: Poetry version failed."; exit 1; }
 	git add .
-	git commit -m "Auto Commit for poetry dependancies and auto release: $(NEW_TAG)"
-	git tag -a $(NEW_TAG) -m "Release Tag: $(NEW_TAG)"
-	git push origin main
-	git push origin $(NEW_TAG);
+	git commit -m "Dependencies updated and version bumped to $(NEW_TAG)"
 
-release: test stage-release
+increment-version: 
+	git tag -a $(NEW_TAG) -m "Release version $(NEW_TAG): This tag includes updates and bug fixes."
+	git push origin main
+	git push origin $(NEW_TAG)
+
+release: pre-commit-test auto-commit increment-version
+
+.DEFAULT_GOAL := help
 
 help:
 	@echo "Available targets:"
 	@echo "  release           - Run tests, increment the bug-fix version of the latest tag, lock dependencies, commit changes, and push the tag."
-	@echo "  test              - Run pytest with verbose output, stop after the first failure, and suppress warnings."
+	@echo "  pre-commit-test   - Run pytest with verbose output, stop after the first failure, and suppress warnings."
 	@echo "  auto-commit       - Lock dependencies with Poetry, prepare the commit with the new version, and stage changes."
-	@echo "  increment-version - Create and push the new version tag to the remote repository."
+	@echo "  increment-version - Create and push the new version tag with a unique message."
