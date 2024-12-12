@@ -13,8 +13,12 @@ endef
 
 NEW_TAG := $(call NEXT_AVAILABLE_TAG)
 
-.PHONY: release commit
-commit:
+.PHONY: release commit-prep increment-version test
+
+test:
+	poetry run pytest -v --maxfail=1 --disable-warnings || { echo "Error: Tests failed."; exit 1; }
+
+commit: test
 	poetry lock || { echo "Error: Poetry lock failed."; exit 1; }
 	@if [ "$(LATEST_TAG)" = "0.0.0" ]; then \
 		echo "No tags found. Initializing tag to 0.0.1"; \
@@ -28,11 +32,11 @@ commit:
 # \
 # git push origin; \
 
-increment-version:
+increment-version: 
 	git tag $(NEW_TAG); \
 	git push origin $(NEW_TAG);
 
-release: commit increment-version
+release: test commit-prep increment-version
 
 .DEFAULT_GOAL := help
 
