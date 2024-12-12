@@ -36,6 +36,7 @@ auto-commit:
 increment-version: 
 	poetry version $(NEW_TAG) || { echo "Error: Poetry version failed."; exit 1; }
 	git tag $(NEW_TAG); \
+	git commit -am "Release $(NEW_TAG)"; \
 	git push origin $(NEW_TAG);
 
 release: test auto-commit increment-version
