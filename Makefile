@@ -33,8 +33,8 @@ auto-commit:
 	git push -u origin main
 
 increment-version:
-	git tag -a $(NEW_TAG) -m "Release version: $(NEW_TAG)"
-	git commit -m "Finalizing release $(NEW_TAG)"
+	git add .
+	git tag -a $(NEW_TAG) -m "Finalizing release $(NEW_TAG)"
 	git push origin $(NEW_TAG)
 
 release: pre-commit-test auto-commit increment-version
