@@ -1,11 +1,22 @@
 LATEST_TAG := $(shell git describe --tags --abbrev=0 2>/dev/null || echo 0.0.0)
-NEW_TAG := $(shell echo $(LATEST_TAG) | awk -F. '{printf "%d.%d.%d", $$1, $$2, $$3+1}')
 
-.PHONY: release 
-release:
+# Function to calculate the next available tag
+define NEXT_AVAILABLE_TAG
+$(shell \
+    latest=$(LATEST_TAG); \
+    while git tag | grep -q "^$${latest}$$"; do \
+        latest=$$(echo $${latest} | awk -F. '{printf "%d.%d.%d", $$1, $$2, $$3+1}'); \
+    done; \
+    echo $${latest} \
+)
+endef
+
+NEW_TAG := $(call NEXT_AVAILABLE_TAG)
+
+.PHONY: release commit
+commit:
 	poetry lock || { echo "Error: Poetry lock failed."; exit 1; }
-
-	@if [ -z "$(LATEST_TAG)" ]; then \
+	@if [ "$(LATEST_TAG)" = "0.0.0" ]; then \
 		echo "No tags found. Initializing tag to 0.0.1"; \
 		NEW_TAG=0.0.1; \
 	else \
@@ -15,12 +26,16 @@ release:
 	git add .; \
 	git commit -m "Auto-commit: preparing for release $(NEW_TAG)"; \
 	git push origin; \
+
+increment-version:
 	git tag $(NEW_TAG); \
 	git push origin $(NEW_TAG);
+
+release: commit increment-version
 
 .DEFAULT_GOAL := help
 
 .PHONY: help
 help:
 	@echo "Available targets:"
-	@echo "  release  - Increment the bug-fix version of the latest tag, commit changes, and push it."
+	@echo "  release  - Increment the bug-fix version of the latest tag, run poetry lock, commit changes, and push it."
