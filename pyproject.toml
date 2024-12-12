@@ -6,11 +6,10 @@ authors = ["Jeroen van Lier <jeroencvlier@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
-pandas = ">=2.1"
+python = ">=3.9,<3.13"
+pandas = ">=2.1.4"
 loguru = "^0.7.3"
 pandas-market-calendars = "^4.4.2"
-
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
