@@ -117,7 +117,6 @@ def calculate_mark_fb(df: pd.DataFrame, fb: str) -> pd.DataFrame:
     required_column_check(df, [f"ask_{fb}", f"bid_{fb}"])
     df[f"mark_{fb}"] = fc32(((df[f"ask_{fb}"] - df[f"bid_{fb}"]) / 2) + df[f"bid_{fb}"])
     return df
-    
 
 
 def calculate_spreads(df: pd.DataFrame) -> pd.DataFrame:
