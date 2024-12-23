@@ -86,12 +86,6 @@ def calculate_cal_spread(df: pd.DataFrame) -> pd.DataFrame:
     Raises:
         KeyError: If any of the required columns are missing in the input DataFrame.
     """
-    # required_columns = ["bid_front", "ask_back", "ask_front", "bid_back"]
-    # column_in_df = all(col in df.columns for col in required_columns)
-    # if not all(col in df.columns for col in required_columns):
-    #     raise KeyError(
-    #         f"Required columns {required_columns[column_in_df]} not found in DataFrame."
-    #     )
     required_column_check(df, ["bid_front", "ask_back", "ask_front", "bid_back"])
 
     # ask_cal should be larger than bid_cal
@@ -110,6 +104,20 @@ def calculate_cal_spread(df: pd.DataFrame) -> pd.DataFrame:
         axis=1,
     )
     return df
+
+
+def calculate_mark(df: pd.DataFrame) -> pd.DataFrame:
+    required_column_check(df, ["ask", "bid"])
+    df["mark"] = fc32(((df["ask"] - df["bid"]) / 2) + df["bid"])
+    return df
+
+
+def calculate_mark_fb(df: pd.DataFrame, fb: str) -> pd.DataFrame:
+    assert fb in ["front", "back"], "fb must be either 'front' or 'back'"
+    required_column_check(df, [f"ask_{fb}", f"bid_{fb}"])
+    df[f"mark_{fb}"] = fc32(((df[f"ask_{fb}"] - df[f"bid_{fb}"]) / 2) + df[f"bid_{fb}"])
+    return df
+    
 
 
 def calculate_spreads(df: pd.DataFrame) -> pd.DataFrame:
