@@ -4,6 +4,7 @@ from .calendar_calculations import (
     calculate_fb_spread,
     calculate_cal_spread,
     calculate_spreads,
+    required_column_check,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "calculate_fb_spread",
     "calculate_cal_spread",
     "calculate_spreads",
+    "required_column_check",
 ]

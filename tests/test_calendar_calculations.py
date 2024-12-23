@@ -30,6 +30,23 @@ def test_fc32():
     assert np.allclose(result.values, expected, atol=1e-5)
 
 
+def test_required_column_check(base_sample_df):
+    assert (
+        oe.required_column_check(
+            base_sample_df, ["mark_back", "mark_front", "strike", "underlying"]
+        )
+        is True
+    )
+
+
+def test_required_column_check_missing_columns(base_sample_df):
+    with pytest.raises(KeyError):
+        oe.required_column_check(
+            base_sample_df,
+            ["mark_back", "mark_front", "strike", "underlying", "invalid"],
+        )
+
+
 # Test calendar_calculations
 def test_calendar_calculations(base_sample_df):
     df = oe.calendar_calculations(base_sample_df)

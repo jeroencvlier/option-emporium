@@ -6,6 +6,26 @@ def fc32(series: pd.Series) -> pd.Series:
     return series.round(5).astype("float32")
 
 
+def required_column_check(df: pd.DataFrame, required_columns: list) -> bool:
+    """
+    Check if the required columns are present in the given DataFrame.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame to check.
+        required_columns (list): The list of required columns to check.
+
+    Returns:
+        bool: True if all required columns are present in the DataFrame.
+
+    Raises:
+        KeyError: If any of the required columns are missing in the input DataFrame.
+    """
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if len(missing_columns) > 0:
+        raise KeyError(f"Required columns {missing_columns} not found in DataFrame.")
+    return True
+
+
 def calendar_calculations(df: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate calendar-related values based on the given DataFrame.
@@ -19,9 +39,7 @@ def calendar_calculations(df: pd.DataFrame) -> pd.DataFrame:
     Raises:
         KeyError: If any of the required columns are missing in the input DataFrame.
     """
-    required_columns = ["mark_back", "mark_front", "strike", "underlying"]
-    if not all(col in df.columns for col in required_columns):
-        raise KeyError(f"Required columns {required_columns} not found in DataFrame.")
+    required_column_check(df, ["mark_back", "mark_front", "strike", "underlying"])
 
     df["calCost"] = fc32(df["mark_back"] - df["mark_front"])
     df["calGapPct"] = fc32(df["calCost"] / df["mark_front"])
@@ -46,9 +64,9 @@ def calculate_fb_spread(df: pd.DataFrame, fb: str) -> pd.DataFrame:
         KeyError: If any of the required columns are missing in the input DataFrame.
     """
     assert fb in ["front", "back"], "fb must be either 'front' or 'back'"
-    required_columns = [f"ask_{fb}", f"bid_{fb}", f"mark_{fb}"]
-    if not all(col in df.columns for col in required_columns):
-        raise KeyError(f"Required columns {required_columns} not found in DataFrame.")
+    required_column_check(df, [f"ask_{fb}", f"bid_{fb}", f"mark_{fb}"])
+    # if not all(col in df.columns for col in required_columns):
+    #     raise KeyError(f"Required columns {required_columns} not found in DataFrame.")
 
     df[f"spread_{fb}"] = df[f"ask_{fb}"] - df[f"bid_{fb}"]
     df[f"spreadPct_{fb}"] = (df[f"spread_{fb}"] / df[f"mark_{fb}"]).round(2)
@@ -68,9 +86,13 @@ def calculate_cal_spread(df: pd.DataFrame) -> pd.DataFrame:
     Raises:
         KeyError: If any of the required columns are missing in the input DataFrame.
     """
-    required_columns = ["bid_front", "ask_back", "ask_front", "bid_back"]
-    if not all(col in df.columns for col in required_columns):
-        raise KeyError(f"Required columns {required_columns} not found in DataFrame.")
+    # required_columns = ["bid_front", "ask_back", "ask_front", "bid_back"]
+    # column_in_df = all(col in df.columns for col in required_columns)
+    # if not all(col in df.columns for col in required_columns):
+    #     raise KeyError(
+    #         f"Required columns {required_columns[column_in_df]} not found in DataFrame."
+    #     )
+    required_column_check(df, ["bid_front", "ask_back", "ask_front", "bid_back"])
 
     # ask_cal should be larger than bid_cal
     df["ask_cal"] = fc32(df["bid_front"] - df["ask_back"])
