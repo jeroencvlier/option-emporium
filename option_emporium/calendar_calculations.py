@@ -43,12 +43,14 @@ def calendar_calculations(df: pd.DataFrame) -> pd.DataFrame:
     Raises:
         KeyError: If any of the required columns are missing in the input DataFrame.
     """
-    required_column_check(df, ["mark_back", "mark_front", "strike", "underlying"])
+    required_column_check(df, ["mark_back", "mark_front", "strike", "underlying_price"])
 
     df["calCost"] = fc32(df["mark_back"] - df["mark_front"])
     df["calGapPct"] = fc32(df["calCost"] / df["mark_front"])
-    df["undPricePctDiff"] = fc32((df["strike"] - df["underlying"]) / df["underlying"])
-    df["calCostPct"] = fc32((df["calCost"] / df["underlying"]) * 100)
+    df["undPricePctDiff"] = fc32(
+        (df["strike"] - df["underlying_price"]) / df["underlying_price"]
+    )
+    df["calCostPct"] = fc32((df["calCost"] / df["underlying_price"]) * 100)
     return df
 
 

@@ -12,7 +12,7 @@ def base_sample_df():
             "mark_back": [100, 200],
             "mark_front": [50, 150],
             "strike": [120, 180],
-            "underlying": [100, 175],
+            "underlying_price": [100, 175],
             "ask_front": [55, 160],
             "bid_front": [45, 140],
             "ask_back": [105, 210],
@@ -33,7 +33,7 @@ def test_fc32():
 def test_required_column_check(base_sample_df):
     assert (
         oe.required_column_check(
-            base_sample_df, ["mark_back", "mark_front", "strike", "underlying"]
+            base_sample_df, ["mark_back", "mark_front", "strike", "underlying_price"]
         )
         is True
     )
@@ -43,7 +43,7 @@ def test_required_column_check_missing_columns(base_sample_df):
     with pytest.raises(KeyError):
         oe.required_column_check(
             base_sample_df,
-            ["mark_back", "mark_front", "strike", "underlying", "invalid"],
+            ["mark_back", "mark_front", "strike", "underlying_price", "invalid"],
         )
 
 
