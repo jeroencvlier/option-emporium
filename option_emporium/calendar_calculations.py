@@ -2,8 +2,12 @@ import pandas as pd
 import numpy as np
 
 
-def fc32(series: pd.Series) -> pd.Series:
-    return series.round(5).astype("float32")
+def fc32(series_or_value, decimals=5):
+    """Handle both Series and scalar inputs."""
+    if isinstance(series_or_value, pd.Series):
+        return series_or_value.round(decimals).astype("float32")
+    else:
+        return round(series_or_value, decimals)
 
 
 def required_column_check(df: pd.DataFrame, required_columns: list) -> bool:
@@ -108,14 +112,16 @@ def calculate_cal_spread(df: pd.DataFrame) -> pd.DataFrame:
 
 def calculate_mark(df: pd.DataFrame) -> pd.DataFrame:
     required_column_check(df, ["ask", "bid"])
-    df["mark"] = fc32(((df["ask"] - df["bid"]) / 2) + df["bid"])
+    df["mark"] = fc32(((df["ask"] - df["bid"]) / 2) + df["bid"], decimals=2)
     return df
 
 
 def calculate_mark_fb(df: pd.DataFrame, fb: str) -> pd.DataFrame:
     assert fb in ["front", "back"], "fb must be either 'front' or 'back'"
     required_column_check(df, [f"ask_{fb}", f"bid_{fb}"])
-    df[f"mark_{fb}"] = fc32(((df[f"ask_{fb}"] - df[f"bid_{fb}"]) / 2) + df[f"bid_{fb}"])
+    df[f"mark_{fb}"] = fc32(
+        ((df[f"ask_{fb}"] - df[f"bid_{fb}"]) / 2) + df[f"bid_{fb}"], decimals=2
+    )
     return df
 
 
