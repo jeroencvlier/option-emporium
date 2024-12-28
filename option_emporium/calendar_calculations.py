@@ -93,20 +93,21 @@ def calculate_cal_spread(df: pd.DataFrame) -> pd.DataFrame:
     required_column_check(df, ["bid_front", "ask_back", "ask_front", "bid_back"])
 
     # ask_cal should be larger than bid_cal
-    df["ask_cal"] = fc32(df["bid_front"] - df["ask_back"])
+    df["ask_cal"] = fc32(df["ask_back"] - df["bid_front"])
 
     # bid_cal should be smaller than ask_cal
-    df["bid_cal"] = fc32(df["ask_front"] - df["bid_back"])
-    df["spread_cal"] = df["bid_cal"] - df["ask_cal"]
+    df["bid_cal"] = fc32(df["bid_back"] - df["ask_front"])
+
+    df["spread_cal"] = fc32(df["ask_cal"] - df["bid_cal"])
+    df["mark_cal"] = fc32((df["bid_cal"] + df["ask_cal"]) / 2)
 
     # Handle division by zero for spreadPct_cal
     # TODO: Handle division by zero for spreadPct_cal
     df["spreadPct_cal"] = df.apply(
-        lambda row: (
-            np.nan if row["ask_cal"] == 0 else fc32(row["spread_cal"] / row["ask_cal"])
-        ),
+        lambda row: np.nan if row["mark_cal"] == 0 else row["spread_cal"] / row["mark_cal"],
         axis=1,
     )
+    df["spreadPct_cal"] = fc32(df["spreadPct_cal"])
     return df
 
 
@@ -119,9 +120,7 @@ def calculate_mark(df: pd.DataFrame) -> pd.DataFrame:
 def calculate_mark_fb(df: pd.DataFrame, fb: str) -> pd.DataFrame:
     assert fb in ["front", "back"], "fb must be either 'front' or 'back'"
     required_column_check(df, [f"ask_{fb}", f"bid_{fb}"])
-    df[f"mark_{fb}"] = fc32(
-        ((df[f"ask_{fb}"] - df[f"bid_{fb}"]) / 2) + df[f"bid_{fb}"], decimals=2
-    )
+    df[f"mark_{fb}"] = fc32(((df[f"ask_{fb}"] - df[f"bid_{fb}"]) / 2) + df[f"bid_{fb}"], decimals=2)
     return df
 
 

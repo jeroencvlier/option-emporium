@@ -84,47 +84,28 @@ def test_calculate_fb_spread_missing_columns():
         oe.calculate_fb_spread(df, "front")
 
 
-# Test calculate_cal_spread
-def test_calculate_cal_spread(base_sample_df):
-    df = base_sample_df.copy()
-    df["ask_cal"] = df["bid_front"] - df["ask_back"]
-    df["bid_cal"] = df["ask_front"] - df["bid_back"]
-    df["mark_cal"] = (df["ask_cal"] + df["bid_cal"]) / 2
-    df = oe.calculate_cal_spread(df)
-    assert "ask_cal" in df.columns
-    assert "bid_cal" in df.columns
-    assert "spread_cal" in df.columns
-    assert "spreadPct_cal" in df.columns
-
-
 def test_calculate_cal_spread_division_by_zero():
-    # Generate 50 rows with edge cases and valid scenarios
-    # Includes zeros every 5 rows
-    df = pd.DataFrame(
-        {
-            "bid_front": [50, 51, 52, 53, 54, 55, 56, 57, 58, 59],
-            "ask_back": [50, 46, 47, 53, 49, 50, 51, 52, 53, 59],
-            "ask_front": [55, 56, 57, 58, 59, 60, 61, 62, 63, 64],
-            "bid_back": [45, 46, 47, 48, 49, 50, 51, 52, 53, 54],
-        }
-    )
+    """
+    Test that calculate_cal_spread correctly handles division by zero
+    and returns NaN in spreadPct_cal when midpoint is zero.
+    """
+    df = pd.read_csv("tests/test_calculate_cal_spread_division_by_zero.csv")
+
+    ground_truth = df[["ask_cal", "bid_cal", "spread_cal", "mark_cal", "spreadPct_cal"]].copy()
+    for col in ground_truth.columns:
+        ground_truth[col] = oe.fc32(df[col])
 
     df = oe.calculate_cal_spread(df)
-    zeros = df[df["ask_cal"] == 0].shape[0]
-    assert df["spreadPct_cal"].isna().sum() == zeros, "Division by zero not handled"
 
+    # df.info()
+    # ground_truth.info()
 
-# Test calculate_spreads
-def test_calculate_spreads(base_sample_df):
-    df = base_sample_df.copy()
-    df["ask_cal"] = df["bid_front"] - df["ask_back"]
-    df["bid_cal"] = df["ask_front"] - df["bid_back"]
-    df["mark_cal"] = (df["ask_cal"] + df["bid_cal"]) / 2
-    df = oe.calculate_spreads(df)
-    assert "spread_front" in df.columns
-    assert "spreadPct_front" in df.columns
-    assert "spread_back" in df.columns
-    assert "spreadPct_back" in df.columns
-    assert "ask_cal" in df.columns
-    assert "spread_cal" in df.columns
-    assert "spreadPct_cal" in df.columns
+    assert df["ask_cal"].equals(ground_truth["ask_cal"]), "ask_cal not calculated correctly"
+    assert df["bid_cal"].equals(ground_truth["bid_cal"]), "bid_cal not calculated correctly"
+    assert df["spread_cal"].equals(
+        ground_truth["spread_cal"]
+    ), "spread_cal not calculated correctly"
+    assert df["mark_cal"].equals(ground_truth["mark_cal"]), "mark_cal not calculated correctly"
+    assert df["spreadPct_cal"].equals(
+        ground_truth["spreadPct_cal"]
+    ), "spreadPct_cal not calculated correctly"
