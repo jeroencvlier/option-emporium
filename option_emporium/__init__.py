@@ -7,6 +7,7 @@ from .calendar_calculations import (
     required_column_check,
     calculate_mark,
     calculate_mark_fb,
+    calculate_diffs,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "required_column_check",
     "calculate_mark",
     "calculate_mark_fb",
+    "calculate_diffs",
 ]
