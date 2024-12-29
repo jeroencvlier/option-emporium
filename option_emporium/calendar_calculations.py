@@ -177,3 +177,40 @@ def calculate_spreads(df: pd.DataFrame) -> pd.DataFrame:
     df = calculate_fb_spread(df, "back")
     df = calculate_cal_spread(df)
     return df
+
+
+def expected_calendar_price(df: pd.DataFrame) -> pd.DataFrame:
+    required_column_check(df, ["calCostPct", "calCostPctMean", "underlying", "symbol"])
+
+    df["avgCalCost"] = round((df["calCostPctMean"] / 100) * df["underlying"], 2)
+
+    df["expectedCalCostPctDiff"] = round(df["calCostPctMeanDayZero"] - df["calCostPct"], 4)
+
+    df["expectedCalCost"] = round(df["calCostPctMeanDayZero"] / 100 * df["underlying"], 2)
+
+    df_symbs = []
+    for symbol in df["symbol"].unique():
+        df_symb = df[df["symbol"] == symbol].copy()
+        df_symb.sort_values("strike", inplace=True)
+        df_symb["calCostDiff"] = df_symb["calCost"].diff().fillna(0)
+        df_symb["calCostDiffCumsum"] = df_symb["calCostDiff"].cumsum()
+        df_symb["calCostDiffPct"] = round(
+            abs(
+                df_symb["calCostDiffCumsum"]
+                / (df_symb["calCost"] + abs(df_symb["calCostDiffCumsum"]))
+            ),
+            3,
+        )
+        df_symb["avgCalCost"] = round(df_symb["avgCalCost"] + df_symb["calCostDiffCumsum"], 2)
+        df_symb["targetPrice"] = round(
+            df_symb["expectedCalCost"] * (1 - df_symb["calCostDiffPct"]), 2
+        )
+        df_symb["expectedProfit"] = round(df_symb["targetPrice"] - df_symb["calCost"], 2)
+        df_symb["expectedProfitPct"] = round((df_symb["expectedProfit"] / df_symb["calCost"]) * 100)
+
+        df_symbs.append(df_symb)
+
+    df = pd.concat(df_symbs)
+    df.drop(columns=["calCostDiff", "calCostDiffCumsum", "calCostDiffPct"], inplace=True)
+
+    return df

@@ -8,6 +8,7 @@ from .calendar_calculations import (
     calculate_mark,
     calculate_mark_fb,
     calculate_diffs,
+    expected_calendar_price,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "calculate_mark",
     "calculate_mark_fb",
     "calculate_diffs",
+    "expected_calendar_price",
 ]
