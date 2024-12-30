@@ -100,12 +100,12 @@ def calculate_cal_spread(df: pd.DataFrame) -> pd.DataFrame:
     df["bid_cal"] = fc32(df["bid_back"] - df["ask_front"])
 
     df["spread_cal"] = fc32(df["ask_cal"] - df["bid_cal"])
-    df["mark_cal"] = fc32((df["bid_cal"] + df["ask_cal"]) / 2)
+    df["mark_cal"] = fc32((df["spread_cal"] / 2) + df["bid_cal"])
 
     # Handle division by zero for spreadPct_cal
     # TODO: Handle division by zero for spreadPct_cal
     df["spreadPct_cal"] = df.apply(
-        lambda row: np.nan if row["mark_cal"] == 0 else row["spread_cal"] / row["mark_cal"],
+        lambda row: np.nan if row["ask_cal"] == 0 else row["spread_cal"] / row["ask_cal"],
         axis=1,
     )
     df["spreadPct_cal"] = fc32(df["spreadPct_cal"])

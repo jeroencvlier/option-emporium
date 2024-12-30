@@ -89,23 +89,34 @@ def test_calculate_cal_spread_division_by_zero():
     Test that calculate_cal_spread correctly handles division by zero
     and returns NaN in spreadPct_cal when midpoint is zero.
     """
-    df = pd.read_csv("tests/test_calculate_cal_spread_division_by_zero.csv")
 
-    ground_truth = df[["ask_cal", "bid_cal", "spread_cal", "mark_cal", "spreadPct_cal"]].copy()
-    for col in ground_truth.columns:
-        ground_truth[col] = oe.fc32(df[col])
+    df = pd.DataFrame(
+        {
+            "bid_front": [4.65],
+            "ask_back": [5.4],
+            "ask_front": [4.8],
+            "bid_back": [5.2],
+        }
+    )
+
+    df_test = pd.DataFrame(
+        {
+            "ask_cal": [0.75],
+            "bid_cal": [0.4],
+            "spread_cal": [0.35],
+            "mark_cal": [0.575],
+            "spreadPct_cal": [0.46667],
+        }
+    )
+
+    df_test = df_test.astype("float32")
 
     df = oe.calculate_cal_spread(df)
 
-    # df.info()
-    # ground_truth.info()
-
-    assert df["ask_cal"].equals(ground_truth["ask_cal"]), "ask_cal not calculated correctly"
-    assert df["bid_cal"].equals(ground_truth["bid_cal"]), "bid_cal not calculated correctly"
-    assert df["spread_cal"].equals(
-        ground_truth["spread_cal"]
-    ), "spread_cal not calculated correctly"
-    assert df["mark_cal"].equals(ground_truth["mark_cal"]), "mark_cal not calculated correctly"
+    assert df["ask_cal"].equals(df_test["ask_cal"]), "ask_cal not calculated correctly"
+    assert df["bid_cal"].equals(df_test["bid_cal"]), "bid_cal not calculated correctly"
+    assert df["spread_cal"].equals(df_test["spread_cal"]), "spread_cal not calculated correctly"
+    assert df["mark_cal"].equals(df_test["mark_cal"]), "mark_cal not calculated correctly"
     assert df["spreadPct_cal"].equals(
-        ground_truth["spreadPct_cal"]
+        df_test["spreadPct_cal"]
     ), "spreadPct_cal not calculated correctly"
