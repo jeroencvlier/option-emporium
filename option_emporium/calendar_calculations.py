@@ -126,9 +126,9 @@ def calculate_mark_fb(df: pd.DataFrame, fb: str) -> pd.DataFrame:
 
 
 def pct_under_over_mean(df: pd.DataFrame) -> pd.DataFrame:
-    assert any(
-        ["implied_vol_front" in df.columns, "implied_vol_back" in df.columns]
-    ), "Missing implied volatility columns"
+    assert any(["implied_vol_front" in df.columns, "implied_vol_back" in df.columns]), (
+        "Missing implied volatility columns"
+    )
     if "histcalcostmean" in df.columns:
         df["pct_under_over_mean"] = df["calCostPct"] - df["histcalcostmean"]
     else:
@@ -179,36 +179,86 @@ def calculate_spreads(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+# def expected_calendar_price(df: pd.DataFrame) -> pd.DataFrame:
+#     required_column_check(df, ["calCostPct", "calCostPctMean", "underlying", "symbol"])
+
+#     df["avgCalCost"] = round((df["calCostPctMean"] / 100) * df["underlying"], 2)
+
+#     df["expectedCalCostPctDiff"] = round(df["calCostPctMeanDayZero"] - df["calCostPct"], 4)
+
+#     df["expectedCalCost"] = round(df["calCostPctMeanDayZero"] / 100 * df["underlying"], 2)
+
+#     df_symbs = []
+#     for symbol in df["symbol"].unique():
+#         df_symb = df[df["symbol"] == symbol].copy()
+#         df_symb.sort_values("strike", inplace=True)
+#         df_symb["calCostDiff"] = df_symb["calCost"].diff().fillna(0)
+#         df_symb["calCostDiffCumsum"] = df_symb["calCostDiff"].cumsum()
+#         df_symb["calCostDiffPct"] = round(
+#             abs(
+#                 df_symb["calCostDiffCumsum"]
+#                 / (df_symb["calCost"] + abs(df_symb["calCostDiffCumsum"]))
+#             ),
+#             3,
+#         )
+#         df_symb["avgCalCost"] = round(df_symb["avgCalCost"] + df_symb["calCostDiffCumsum"], 2)
+#         df_symb["targetPrice"] = round(
+#             df_symb["expectedCalCost"] * (1 - df_symb["calCostDiffPct"]), 2
+#         )
+#         df_symb["expectedProfit"] = round(df_symb["targetPrice"] - df_symb["calCost"], 2)
+#         df_symb["expectedProfitPct"] = round((df_symb["expectedProfit"] / df_symb["calCost"]) * 100)
+
+#         df_symbs.append(df_symb)
+
+#     df = pd.concat(df_symbs)
+#     df.drop(columns=["calCostDiff", "calCostDiffCumsum", "calCostDiffPct"], inplace=True)
+
+#     return df
+
+
 def expected_calendar_price(df: pd.DataFrame) -> pd.DataFrame:
-    required_column_check(df, ["calCostPct", "calCostPctMean", "underlying", "symbol"])
+    # required_column_check(df, ["calCostPct", "calCostPctMean", "underlying", "symbol"])
 
     df["avgCalCost"] = round((df["calCostPctMean"] / 100) * df["underlying"], 2)
 
     df["expectedCalCostPctDiff"] = round(df["calCostPctMeanDayZero"] - df["calCostPct"], 4)
 
-    df["expectedCalCost"] = round(df["calCostPctMeanDayZero"] / 100 * df["underlying"], 2)
+    # df["targetPrice"] = round((df["calCostPctMeanDayZero"] * df["underlying"])/100, 2)
+    # df["expectedProfit"] = round(df["targetPrice"] - df["calCost"], 2)
+    # df["expectedProfitPct"] = round((df["expectedProfit"] / df["calCost"]) * 100)
+    df["expectedCalCost"] = round((df["calCostPctMeanDayZero"] * df["underlying"]) / 100, 2)
+
+    # df['calCostPct'] = (df["calCost"] / df["underlying"]) * 100
 
     df_symbs = []
     for symbol in df["symbol"].unique():
         df_symb = df[df["symbol"] == symbol].copy()
-        df_symb.sort_values("strike", inplace=True)
-        df_symb["calCostDiff"] = df_symb["calCost"].diff().fillna(0)
-        df_symb["calCostDiffCumsum"] = df_symb["calCostDiff"].cumsum()
-        df_symb["calCostDiffPct"] = round(
-            abs(
-                df_symb["calCostDiffCumsum"]
-                / (df_symb["calCost"] + abs(df_symb["calCostDiffCumsum"]))
-            ),
-            3,
-        )
-        df_symb["avgCalCost"] = round(df_symb["avgCalCost"] + df_symb["calCostDiffCumsum"], 2)
-        df_symb["targetPrice"] = round(
-            df_symb["expectedCalCost"] * (1 - df_symb["calCostDiffPct"]), 2
-        )
-        df_symb["expectedProfit"] = round(df_symb["targetPrice"] - df_symb["calCost"], 2)
-        df_symb["expectedProfitPct"] = round((df_symb["expectedProfit"] / df_symb["calCost"]) * 100)
+        for weeks in df_symb["weeks"].unique():
+            df_symb_week = df_symb[df_symb["weeks"] == weeks].copy()
+            df_symb_week.sort_values("strike", inplace=True)
+            df_symb_week["calCostDiff"] = df_symb_week["calCost"].diff().fillna(0)
+            df_symb_week["calCostDiffCumsum"] = df_symb_week["calCostDiff"].cumsum()
+            df_symb_week["calCostDiffPct"] = round(
+                abs(
+                    df_symb_week["calCostDiffCumsum"]
+                    / (df_symb_week["calCost"] + abs(df_symb_week["calCostDiffCumsum"]))
+                ),
+                3,
+            )
+            df_symb_week["avgCalCost"] = round(
+                df_symb_week["avgCalCost"] + df_symb_week["calCostDiffCumsum"], 2
+            )
+            df_symb_week["targetPrice"] = round(
+                df_symb_week["expectedCalCost"] * (1 - df_symb_week["calCostDiffPct"]), 2
+            )
+            df_symb_week["expectedProfit"] = round(
+                df_symb_week["targetPrice"] - df_symb_week["calCost"], 2
+            )
+            df_symb_week["expectedProfitPct"] = round(
+                (df_symb_week["expectedProfit"] / df_symb_week["calCost"]) * 100
+            )
 
-        df_symbs.append(df_symb)
+            df_symbs.append(df_symb_week)
 
     df = pd.concat(df_symbs)
     df.drop(columns=["calCostDiff", "calCostDiffCumsum", "calCostDiffPct"], inplace=True)
